@@ -1,0 +1,8 @@
+[project]
+name = "DeathNote"
+version = "0.0.1"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi[standard]>=0.115.12",
+    "pydantic-settings>=2.8.1",
+]
