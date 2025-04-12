@@ -1,13 +1,13 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
-from app.database.connection import create_all_tables
+from app.database.connection import connect_firebase
 from app.utils.http_error_handler import HTTPErrorHandler
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    create_all_tables()
+    connect_firebase()
     yield
 
 

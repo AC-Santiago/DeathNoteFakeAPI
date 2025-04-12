@@ -1,26 +1,22 @@
-from typing import Annotated
+from typing import Annotated, Optional
 from fastapi import Depends
 from pydantic_settings import BaseSettings
 from functools import lru_cache
 
 
 class Settings(BaseSettings):
-    DB_HOST: str
-    DB_PORT: int
-    DB_NAME: str
-    DB_USERNAME: str
-    DB_PASSWORD: str
-
-    SECRET_KEY: str
-    ALGORITHM: str
-    ACCESS_TOKEN_EXPIRE_MINUTES: int
-
-    @property
-    def DATABASE_URL(self) -> str:
-        return f"postgresql://{self.DB_USERNAME}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+    FIRE_BASE_KEY: str
+    APY_KEY: str
+    AUTH_DOMAIN: str
+    PROJECT_ID: str
+    STORAGE_BUCKET: str
+    MESSAGING_SENDER_ID: str
+    APP_ID: str
+    MEASUREMENT_ID: str
+    DATABASE_URL: Optional[str]
 
     def to_dict(self) -> dict:
-        return self.model_dump(exclude={"DB_PASSWORD", "SECRET_KEY"})
+        return self.model_dump(exclude={"FIRE_BASE_KEY"})
 
     class Config:
         env_file = [".env"]
