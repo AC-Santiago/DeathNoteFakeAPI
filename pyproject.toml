@@ -3,9 +3,11 @@ name = "DeathNote"
 version = "0.0.1"
 requires-python = ">=3.11"
 dependencies = [
+    "debugpy>=1.8.14",
     "fastapi[standard]>=0.115.12",
     "firebase-admin>=6.7.0",
     "pydantic-settings>=2.8.1",
+    "pynvim>=0.5.2",
     "pyrebase4>=4.8.0",
     "setuptools>=78.1.0",
 ]
