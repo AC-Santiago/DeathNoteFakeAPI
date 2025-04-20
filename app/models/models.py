@@ -1,16 +1,17 @@
-from enum import Enum
-from typing import Optional
+from uuid import UUID, uuid4
 
-from pydantic import BaseModel
-
-
-class EstadoPersona(str, Enum):
-    VIVO = "vivo"
-    MUERTO = "muerto"
+from app.schemas.persona import PersonaCreate
+from pydantic import Field
 
 
-class Persona(BaseModel):
-    nombre: str
-    apellido: str
-    edad: Optional[int] = None
-    estado: EstadoPersona
+class Persona(PersonaCreate):
+    uid: UUID = Field(default_factory=uuid4)
+
+    def to_dict(self) -> dict:
+        return {
+            "uid": str(self.uid),
+            "nombre": self.nombre,
+            "apellido": self.apellido,
+            "edad": self.edad,
+            "estado": self.estado,
+        }

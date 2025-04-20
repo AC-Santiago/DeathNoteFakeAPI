@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.database.connection import connect_firebase
+from app.routers import persona
 from app.utils.http_error_handler import HTTPErrorHandler
 
 
@@ -19,3 +20,4 @@ app = FastAPI(
 )
 
 app.add_middleware(HTTPErrorHandler)
+app.include_router(persona.router, tags=["personas"])

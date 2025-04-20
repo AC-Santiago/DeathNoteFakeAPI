@@ -1,6 +1,6 @@
 services:
-  DeathNoteAPI:
-    container_name: DeathNoteAPI
+  deathnoteapi:
+    container_name: deathnoteapi
     build: .
     ports:
         - "8000:8000"
@@ -13,3 +13,8 @@ services:
       - MESSAGING_SENDER_ID=${MESSAGING_SENDER_ID}
       - APP_ID=${APP_ID}
       - MEASUREMENT_ID=${MEASUREMENT_ID}
+    develop:
+      watch:
+        - action: rebuild
+          path: ./app
+          target: /DeathNoteFake/app

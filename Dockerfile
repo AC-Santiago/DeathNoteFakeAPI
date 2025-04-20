@@ -21,7 +21,9 @@ COPY ./uv.lock /DeathNoteFake/uv.lock
 RUN --mount=type=cache,target=/root/.cache/uv \
   uv sync --frozen --no-install-project --no-dev
 
-COPY ./app /bff_service/app
+COPY ./app /DeathNoteFake/app
+
+COPY ./app/json /DeathNoteFake/app/json
 
 RUN --mount=type=cache,target=/root/.cache/uv \
   uv sync --frozen --no-dev

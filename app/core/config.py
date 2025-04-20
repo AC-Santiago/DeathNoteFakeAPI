@@ -13,10 +13,10 @@ class Settings(BaseSettings):
     MESSAGING_SENDER_ID: str
     APP_ID: str
     MEASUREMENT_ID: str
-    DATABASE_URL: Optional[str]
+    DATABASE_URL: Optional[str] = None
 
     def to_dict(self) -> dict:
-        return self.model_dump(exclude={"FIRE_BASE_KEY"})
+        return self.model_dump(exclude={"FIRE_BASE_KEY", "DATABASE_URL"})
 
     class Config:
         env_file = [".env"]
