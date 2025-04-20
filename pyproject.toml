@@ -10,4 +10,5 @@ dependencies = [
     "pynvim>=0.5.2",
     "pyrebase4>=4.8.0",
     "setuptools>=78.1.0",
+    "websockets>=15.0.1",
 ]

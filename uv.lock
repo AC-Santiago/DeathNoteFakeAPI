@@ -225,6 +225,7 @@ dependencies = [
     { name = "pynvim" },
     { name = "pyrebase4" },
     { name = "setuptools" },
+    { name = "websockets" },
 ]
 
 [package.metadata]
@@ -236,6 +237,7 @@ requires-dist = [
     { name = "pynvim", specifier = ">=0.5.2" },
     { name = "pyrebase4", specifier = ">=4.8.0" },
     { name = "setuptools", specifier = ">=78.1.0" },
+    { name = "websockets", specifier = ">=15.0.1" },
 ]
 
 [[package]]
