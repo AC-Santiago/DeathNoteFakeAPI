@@ -15,6 +15,10 @@ class Settings(BaseSettings):
     MEASUREMENT_ID: str
     DATABASE_URL: Optional[str] = None
 
+    CLOUDINARY_CLOUD_NAME: str
+    CLOUDINARY_API_KEY: str
+    CLOUDINARY_API_SECRET: str
+
     def to_dict(self) -> dict:
         return self.model_dump(exclude={"FIRE_BASE_KEY", "DATABASE_URL"})
 

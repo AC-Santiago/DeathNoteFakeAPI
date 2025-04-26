@@ -1,5 +1,7 @@
+from typing import Optional
 from enum import Enum
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from datetime import datetime, timezone
 
 
 class EstadoPersona(str, Enum):
@@ -7,8 +9,21 @@ class EstadoPersona(str, Enum):
     MUERTO = "muerto"
 
 
+class CausaMuerte(BaseModel):
+    causa: str = Field(..., description="Causa de la muerte")
+    detalles: Optional[str] = Field(
+        None, description="Detalles específicos de la muerte"
+    )
+    fecha_registro: datetime = Field(default_factory=datetime.now)
+
+
 class PersonaCreate(BaseModel):
-    nombre: str
-    apellido: str
-    edad: int
-    estado: EstadoPersona = EstadoPersona.VIVO
+    nombre: str = Field(..., min_length=1, description="Nombre de la persona")
+    apellido: str = Field(
+        ..., min_length=1, description="Apellido de la persona"
+    )
+    edad: int = Field(..., gt=0, lt=150, description="Edad de la persona")
+    estado: EstadoPersona = Field(default=EstadoPersona.VIVO)
+    foto_url: Optional[str] = None
+    causa_muerte: Optional[CausaMuerte] = None
+    fecha_registro: datetime = Field(default_factory=datetime.now(timezone.utc))

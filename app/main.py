@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
+import cloudinary
 from fastapi import FastAPI
 
+from app.core.config import Settings
 from app.database.connection import connect_firebase
 from app.routers import persona
 from app.utils.http_error_handler import HTTPErrorHandler
@@ -9,6 +11,12 @@ from app.utils.http_error_handler import HTTPErrorHandler
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     connect_firebase()
+    settings = Settings()
+    cloudinary.config(
+        cloud_name=settings.CLOUDINARY_CLOUD_NAME,
+        api_key=settings.CLOUDINARY_API_KEY,
+        api_secret=settings.CLOUDINARY_API_SECRET,
+    )
     yield
 
 
