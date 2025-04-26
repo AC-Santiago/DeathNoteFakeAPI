@@ -1,8 +1,8 @@
 import asyncio
 from typing import Optional
 from google.cloud.firestore import AsyncClient
+from app.crud.persona import get_person, update_person
 from app.schemas.persona import CausaMuerte, EstadoPersona
-from app.crud.persona import get_persona, update_persona
 from app.services.notification import notification_manager
 
 
@@ -13,7 +13,7 @@ async def execute_death(
     Ejecuta la muerte de una persona según las reglas de Death Note.
     """
     try:
-        persona = await get_persona(db, persona_id)
+        persona = await get_person()
         if not persona:
             return
 
@@ -25,10 +25,10 @@ async def execute_death(
 
         persona["estado"] = EstadoPersona.MUERTO
         persona["causa_muerte"] = causa_muerte.model_dump()
-        updated_persona = await update_persona(db, persona_id, persona)
+        updated_persona = await update_person(db, persona_id, persona)
 
         await notification_manager.broadcast_death(updated_persona)
-        await update_persona(db, persona_id, persona)
+        await update_person(db, persona_id, persona)
 
     except Exception as e:
         print(f"Error ejecutando la muerte: {str(e)}")

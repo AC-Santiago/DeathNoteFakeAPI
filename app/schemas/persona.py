@@ -14,15 +14,22 @@ class CausaMuerte(BaseModel):
     detalles: Optional[str] = Field(
         None, description="Detalles específicos de la muerte"
     )
-    fecha_registro: datetime = Field(default_factory=datetime.now)
+    fecha_registro: datetime = Field(default_factory=datetime.now(timezone.utc))
 
 
-class PersonaCreate(BaseModel):
+class PersonaBase(BaseModel):
     nombre: str = Field(..., min_length=1, description="Nombre de la persona")
     apellido: str = Field(
         ..., min_length=1, description="Apellido de la persona"
     )
     edad: int = Field(..., gt=0, lt=150, description="Edad de la persona")
+
+
+class PersonaRequest(PersonaBase):
+    pass
+
+
+class PersonaCreate(PersonaBase):
     estado: EstadoPersona = Field(default=EstadoPersona.VIVO)
     foto_url: Optional[str] = None
     causa_muerte: Optional[CausaMuerte] = None

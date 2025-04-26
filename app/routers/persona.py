@@ -12,12 +12,10 @@ from fastapi import (
 )
 from google.cloud.firestore import AsyncClient
 
-from app.crud.persona import (
-    create_persona,
-)
+from app.crud.persona import create_person, get_people
 from app.database.connection import get_client
 from app.models.models import Persona
-from app.schemas.persona import PersonaCreate
+from app.schemas.persona import EstadoPersona, PersonaCreate, PersonaRequest
 from app.services.death_note import schedule_death
 from app.services.notification import notification_manager
 from app.services.storage import upload_photo
@@ -60,7 +58,7 @@ async def websocket_deaths(websocket: WebSocket):
 )
 async def create_persona_endpoint(
     db: Annotated[AsyncClient, Depends(get_client)],
-    new_persona: PersonaCreate = Body(...),
+    persona_request: PersonaRequest = Body(...),
     foto: UploadFile = File(...),
 ):
     """
@@ -68,11 +66,42 @@ async def create_persona_endpoint(
     Requiere nombre, apellido, edad y una foto.
     """
     try:
+
         foto_url = await upload_photo(foto)
-        persona_dict = await create_persona(db, new_persona, foto_url)
+        new_persona = PersonaCreate(
+            nombre=persona_request.nombre,
+            apellido=persona_request.apellido,
+            edad=persona_request.edad,
+            foto_url=foto_url,
+            causa_muerte=EstadoPersona.VIVO,
+        )
+        persona_dict = await create_person(db, new_persona, foto_url)
         await schedule_death(db, persona_dict["uid"])
 
         return persona_dict
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        )
+
+
+@router.get(
+    "/personas",
+    status_code=status.HTTP_200_OK,
+    response_model=list[Persona],
+    description="Obtiene una lista de personas registradas en la Death Note",
+)
+async def get_personas_endpoint(
+    db: Annotated[AsyncClient, Depends(get_client)],
+    limit: int = 10,
+    offset: int = 0,
+):
+    """
+    Obtiene una lista de personas registradas en la Death Note.
+    """
+    try:
+        personas = await get_people(db, limit, offset)
+        return personas
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)

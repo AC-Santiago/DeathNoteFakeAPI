@@ -7,7 +7,7 @@ from app.models.models import Persona, PersonaCreate
 from app.schemas.persona import EstadoPersona
 
 
-async def create_persona(
+async def create_person(
     db: AsyncClient, persona_data: PersonaCreate, foto_url: Optional[str] = None
 ) -> dict:
     """
@@ -51,4 +51,74 @@ async def create_persona(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error al crear la persona: {str(e)}",
+        )
+
+
+async def get_people(
+    db: AsyncClient, limit: int = 10, offset: int = 0
+) -> list[dict]:
+    """
+    Obtiene una lista de personas de la base de datos.
+    Args:
+        db: Cliente de Firestore
+        limit: Número máximo de personas a obtener
+        offset: Número de personas a omitir
+    Returns:
+        list[dict]: Lista de personas
+    """
+    try:
+        query = db.collection("personas").limit(limit).offset(offset)
+        docs = await query.stream()
+        return [doc.to_dict() for doc in docs]
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error al obtener las personas: {str(e)}",
+        )
+
+
+async def get_person(db: AsyncClient, persona_id: str) -> Optional[dict]:
+    """
+    Obtiene una persona de la base de datos por su ID.
+    Args:
+        db: Cliente de Firestore
+        persona_id: ID de la persona a obtener
+    Returns:
+        Optional[dict]: Datos de la persona o None si no se encuentra
+    """
+    try:
+        doc_ref = db.collection("personas").document(persona_id)
+        doc = await doc_ref.get()
+        if doc.exists:
+            return doc.to_dict()
+        else:
+            return None
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error al obtener la persona: {str(e)}",
+        )
+
+
+async def update_person(
+    db: AsyncClient, persona_id: str, persona_data: dict
+) -> Optional[dict]:
+    """
+    Actualiza una persona en la base de datos por su ID.
+    Args:
+        db: Cliente de Firestore
+        persona_id: ID de la persona a actualizar
+        persona_data: Datos de la persona a actualizar
+
+    """
+    try:
+        doc_ref = db.collection("personas").document(persona_id)
+        await doc_ref.update(persona_data)
+        updated_doc = await doc_ref.get()
+        return updated_doc.to_dict() if updated_doc.exists else None
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error al actualizar la persona: {str(e)}",
         )
