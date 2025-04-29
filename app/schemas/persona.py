@@ -14,7 +14,9 @@ class CausaMuerte(BaseModel):
     detalles: Optional[str] = Field(
         None, description="Detalles específicos de la muerte"
     )
-    fecha_registro: datetime = Field(default_factory=datetime.now(timezone.utc))
+    fecha_registro: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )
 
 
 class PersonaBase(BaseModel):
@@ -33,4 +35,6 @@ class PersonaCreate(PersonaBase):
     estado: EstadoPersona = Field(default=EstadoPersona.VIVO)
     foto_url: Optional[str] = None
     causa_muerte: Optional[CausaMuerte] = None
-    fecha_registro: datetime = Field(default_factory=datetime.now(timezone.utc))
+    fecha_registro: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )

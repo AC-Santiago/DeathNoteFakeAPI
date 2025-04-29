@@ -13,7 +13,7 @@ async def execute_death(
     Ejecuta la muerte de una persona según las reglas de Death Note.
     """
     try:
-        persona = await get_person()
+        persona = await get_person(db, persona_id)
         if not persona:
             return
 
@@ -26,10 +26,8 @@ async def execute_death(
         persona["estado"] = EstadoPersona.MUERTO
         persona["causa_muerte"] = causa_muerte.model_dump()
         updated_persona = await update_person(db, persona_id, persona)
-
+        print(f"Persona actualizada: {updated_persona}")
         await notification_manager.broadcast_death(updated_persona)
-        await update_person(db, persona_id, persona)
-
     except Exception as e:
         print(f"Error ejecutando la muerte: {str(e)}")
 
@@ -66,5 +64,7 @@ async def execute_death_with_delay(
     """
     Ejecuta la muerte después del tiempo especificado.
     """
+    print(f"Esperando {delay} segundos para ejecutar la muerte...")
     await asyncio.sleep(delay)
+    print("Ejecutando muerte...")
     await execute_death(db, persona_id, causa_muerte)

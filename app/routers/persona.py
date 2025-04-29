@@ -58,7 +58,9 @@ async def websocket_deaths(websocket: WebSocket):
 )
 async def create_persona_endpoint(
     db: Annotated[AsyncClient, Depends(get_client)],
-    persona_request: PersonaRequest = Body(...),
+    nombre: str = Body(..., description="Nombre de la persona"),
+    apellido: str = Body(..., description="Apellido de la persona"),
+    edad: int = Body(..., gt=0, lt=150, description="Edad de la persona"),
     foto: UploadFile = File(...),
 ):
     """
@@ -66,18 +68,20 @@ async def create_persona_endpoint(
     Requiere nombre, apellido, edad y una foto.
     """
     try:
-
+        persona_request = PersonaRequest(
+            nombre=nombre, apellido=apellido, edad=edad
+        )
         foto_url = await upload_photo(foto)
         new_persona = PersonaCreate(
             nombre=persona_request.nombre,
             apellido=persona_request.apellido,
             edad=persona_request.edad,
             foto_url=foto_url,
-            causa_muerte=EstadoPersona.VIVO,
+            estado=EstadoPersona.VIVO,
+            causa_muerte=None,
         )
         persona_dict = await create_person(db, new_persona, foto_url)
-        await schedule_death(db, persona_dict["uid"])
-
+        await schedule_death(db, persona_dict)
         return persona_dict
     except Exception as e:
         raise HTTPException(

@@ -68,8 +68,10 @@ async def get_people(
     """
     try:
         query = db.collection("personas").limit(limit).offset(offset)
-        docs = await query.stream()
-        return [doc.to_dict() for doc in docs]
+        docs = []
+        async for doc in query.stream():
+            docs.append(doc.to_dict())
+        return docs
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

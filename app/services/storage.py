@@ -35,7 +35,7 @@ async def upload_photo(file: UploadFile) -> Optional[str]:
 
         upload_result = cloudinary.uploader.upload(
             temp_file_path,
-            folder="death_note/fotos",
+            folder="death_note/personas",
             public_id=str(uuid4()),
             overwrite=True,
         )
