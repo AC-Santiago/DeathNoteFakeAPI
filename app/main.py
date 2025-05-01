@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 import cloudinary
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import Settings
 from app.database.connection import connect_firebase
@@ -25,6 +26,14 @@ app = FastAPI(
     description="API for managing the Death Note",
     version="0.0.1",
     lifespan=lifespan,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
 )
 
 app.add_middleware(HTTPErrorHandler)

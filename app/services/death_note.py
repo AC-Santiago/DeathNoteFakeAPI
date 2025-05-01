@@ -22,11 +22,20 @@ async def execute_death(
                 causa="Ataque al corazón",
                 detalles="Muerte por defecto de la Death Note",
             )
+        causa_muerte_dict_copy = causa_muerte.model_copy().model_dump().copy()
+        date_format = causa_muerte_dict_copy["fecha_registro"].strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
 
         persona["estado"] = EstadoPersona.MUERTO
         persona["causa_muerte"] = causa_muerte.model_dump()
+
         updated_persona = await update_person(db, persona_id, persona)
-        print(f"Persona actualizada: {updated_persona}")
+
+        update_persona_copy = updated_persona.copy()
+        update_persona_copy["causa_muerte"]["fecha_registro"] = date_format
+        updated_persona["causa_muerte"] = update_persona_copy["causa_muerte"]
+
         await notification_manager.broadcast_death(updated_persona)
     except Exception as e:
         print(f"Error ejecutando la muerte: {str(e)}")
@@ -64,7 +73,5 @@ async def execute_death_with_delay(
     """
     Ejecuta la muerte después del tiempo especificado.
     """
-    print(f"Esperando {delay} segundos para ejecutar la muerte...")
     await asyncio.sleep(delay)
-    print("Ejecutando muerte...")
     await execute_death(db, persona_id, causa_muerte)

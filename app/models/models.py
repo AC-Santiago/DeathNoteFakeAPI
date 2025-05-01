@@ -22,5 +22,5 @@ class Persona(PersonaCreate):
             "causa_muerte": (
                 self.causa_muerte.model_dump() if self.causa_muerte else None
             ),
-            "fecha_registro": self.fecha_registro.isoformat(),
+            "fecha_registro": self.fecha_registro,
         }

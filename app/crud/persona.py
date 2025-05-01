@@ -1,5 +1,5 @@
-from datetime import datetime, timezone
 from typing import Optional
+
 from fastapi import HTTPException, status
 from google.cloud.firestore import AsyncClient
 
@@ -37,7 +37,6 @@ async def create_person(
             edad=persona_data.edad,
             estado=EstadoPersona.VIVO,
             foto_url=foto_url,
-            fecha_registro=datetime.now(timezone.utc),
         )
 
         doc_id = str(persona.uid)

@@ -1,3 +1,4 @@
+import asyncio
 from typing import Annotated
 
 from fastapi import (
@@ -42,11 +43,19 @@ async def websocket_deaths(websocket: WebSocket):
         }
     }
     """
-    await notification_manager.connect(websocket)
+
     try:
+        await notification_manager.connect(websocket)
         while True:
-            await websocket.receive_text()
-    except:
+            try:
+                await websocket.send_json({"event": "ping"})
+                await asyncio.sleep(10)
+                # await websocket.receive_text()
+            except Exception:
+                break
+    except Exception:
+        pass
+    finally:
         await notification_manager.disconnect(websocket)
 
 
@@ -81,8 +90,29 @@ async def create_persona_endpoint(
             causa_muerte=None,
         )
         persona_dict = await create_person(db, new_persona, foto_url)
-        await schedule_death(db, persona_dict)
+        await schedule_death(db, persona_dict["uid"])
         return persona_dict
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        )
+
+
+@router.post("/persona/death")
+async def death_persona_endpoint(
+    db: Annotated[AsyncClient, Depends(get_client)],
+    persona_id: str = Body(..., description="ID de la persona"),
+    causa_muerte: dict = Body(
+        ..., description="Causa de la muerte de la persona"
+    ),
+):
+    """
+    Marca a una persona como muerta en la Death Note.
+    Requiere el ID de la persona y la causa de la muerte.
+    """
+    try:
+        await schedule_death(db, persona_id, causa_muerte)
+        return {"message": "Persona marcada como muerta"}
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)

@@ -40,7 +40,8 @@ class NotificationManager:
                         },
                     }
                 )
-            except:
+            except Exception as e:
+                print(f"Error sending message to client: {e}")
                 disconnected.add(connection)
 
         for connection in disconnected:
