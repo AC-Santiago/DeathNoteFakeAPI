@@ -17,6 +17,9 @@ async def execute_death(
         if not persona:
             return
 
+        if check_if_person_is_dead(persona):
+            return
+
         if not causa_muerte:
             causa_muerte = CausaMuerte(
                 causa="Ataque al corazón",
@@ -54,14 +57,30 @@ async def schedule_death(
     especificados después de 40 segundos + 6 minutos y 40 segundos adicionales
     si se proporcionaron detalles.
     """
-    if causa_muerte and causa_muerte.detalles:
-        delay = 400 + 40  # segundos
+    cancel_scheduled_death(persona_id)
+    perona = await get_person(db, persona_id)
+    if not perona:
+        raise ValueError(
+            f"No se encontró la persona con ID {persona_id} para programar la muerte."
+        )
+    if check_if_person_is_dead(perona):
+        raise ValueError(
+            f"La persona con ID {persona_id} ya está muerta. No se puede programar la muerte."
+        )
+    if causa_muerte:
+        delay = 400
     else:
         delay = 40
-
-    asyncio.create_task(
+    if causa_muerte and causa_muerte.detalles:
+        delay = 40
+    task = asyncio.create_task(
         execute_death_with_delay(db, persona_id, causa_muerte, delay)
     )
+
+    _scheduled_deaths[persona_id] = task
+
+
+_scheduled_deaths = {}
 
 
 async def execute_death_with_delay(
@@ -73,5 +92,31 @@ async def execute_death_with_delay(
     """
     Ejecuta la muerte después del tiempo especificado.
     """
-    await asyncio.sleep(delay)
-    await execute_death(db, persona_id, causa_muerte)
+    try:
+        await asyncio.sleep(delay)
+        await execute_death(db, persona_id, causa_muerte)
+    finally:
+        if persona_id in _scheduled_deaths:
+            del _scheduled_deaths[persona_id]
+
+
+def cancel_scheduled_death(persona_id: str) -> bool:
+    """
+    Cancela una muerte programada si existe.
+    Retorna True si se canceló una muerte, False si no había ninguna programada.
+    """
+    if persona_id in _scheduled_deaths:
+        task = _scheduled_deaths[persona_id]
+        task.cancel()
+        del _scheduled_deaths[persona_id]
+        return True
+    return False
+
+
+def check_if_person_is_dead(persona: dict) -> bool:
+    """
+    Verifica si la persona está muerta.
+    """
+    if persona["estado"] == EstadoPersona.MUERTO:
+        return True
+    return False

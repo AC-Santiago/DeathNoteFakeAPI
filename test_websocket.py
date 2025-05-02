@@ -5,7 +5,7 @@ import sys
 
 
 async def test_websocket():
-    uri = "ws://localhost:8000/ws/deaths"
+    uri = "ws://localhost:8000/ws/status"
     try:
         print(f"Attempting to connect to {uri}...")
         async with websockets.connect(uri) as websocket:

@@ -9,11 +9,14 @@ class EstadoPersona(str, Enum):
     MUERTO = "muerto"
 
 
-class CausaMuerte(BaseModel):
+class CausaMuerteBase(BaseModel):
     causa: str = Field(..., description="Causa de la muerte")
     detalles: Optional[str] = Field(
         None, description="Detalles específicos de la muerte"
     )
+
+
+class CausaMuerte(CausaMuerteBase):
     fecha_registro: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc)
     )
@@ -38,3 +41,8 @@ class PersonaCreate(PersonaBase):
     fecha_registro: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc)
     )
+
+
+class PersonaDeathRequest(BaseModel):
+    persona_id: str = Field(..., description="ID de la persona que ha muerto")
+    causa_muerte: CausaMuerteBase = Field(..., description="Causa de la muerte")

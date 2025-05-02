@@ -11,12 +11,19 @@ from fastapi import (
     WebSocket,
     status,
 )
+from fastapi.responses import JSONResponse
 from google.cloud.firestore import AsyncClient
 
-from app.crud.persona import create_person, get_people
+from app.crud.persona import create_person, get_people, get_person
 from app.database.connection import get_client
 from app.models.models import Persona
-from app.schemas.persona import EstadoPersona, PersonaCreate, PersonaRequest
+from app.schemas.persona import (
+    CausaMuerte,
+    EstadoPersona,
+    PersonaCreate,
+    PersonaDeathRequest,
+    PersonaRequest,
+)
 from app.services.death_note import schedule_death
 from app.services.notification import notification_manager
 from app.services.storage import upload_photo
@@ -45,18 +52,45 @@ async def websocket_deaths(websocket: WebSocket):
     """
 
     try:
-        await notification_manager.connect(websocket)
+        await notification_manager.connect(websocket, "deaths")
         while True:
             try:
                 await websocket.send_json({"event": "ping"})
                 await asyncio.sleep(10)
-                # await websocket.receive_text()
             except Exception:
                 break
     except Exception:
         pass
     finally:
-        await notification_manager.disconnect(websocket)
+        await notification_manager.disconnect(websocket, "deaths")
+
+
+@router.websocket("/ws/status")
+async def websocket_status(websocket: WebSocket):
+    """
+    Endpoint WebSocket para recibir actualizaciones en tiempo real del estado de las personas.
+
+    Los clientes recibirán:
+    1. Una carga inicial con todas las personas
+    2. Actualizaciones en tiempo real cuando:
+       - Se crea una nueva persona
+       - Se actualiza el estado de una persona
+       - Se programa una muerte
+    """
+    try:
+        await notification_manager.connect(websocket, "status_updates")
+
+        while True:
+            try:
+                await websocket.send_json({"event": "ping"})
+                await asyncio.sleep(10)
+            except Exception:
+                break
+    except Exception as e:
+        print(f"Error in WebSocket connection: {str(e)}")
+        pass
+    finally:
+        await notification_manager.disconnect(websocket, "status_updates")
 
 
 @router.post(
@@ -91,6 +125,12 @@ async def create_persona_endpoint(
         )
         persona_dict = await create_person(db, new_persona, foto_url)
         await schedule_death(db, persona_dict["uid"])
+
+        asyncio.create_task(
+            notification_manager.broadcast_status_update(
+                "person_created", persona_dict
+            )
+        )
         return persona_dict
     except Exception as e:
         raise HTTPException(
@@ -101,18 +141,37 @@ async def create_persona_endpoint(
 @router.post("/persona/death")
 async def death_persona_endpoint(
     db: Annotated[AsyncClient, Depends(get_client)],
-    persona_id: str = Body(..., description="ID de la persona"),
-    causa_muerte: dict = Body(
-        ..., description="Causa de la muerte de la persona"
-    ),
+    causa_muerte_request: PersonaDeathRequest,
 ):
     """
     Marca a una persona como muerta en la Death Note.
     Requiere el ID de la persona y la causa de la muerte.
+    Si ya existe una muerte programada, esta será cancelada y reemplazada por la nueva.
     """
     try:
-        await schedule_death(db, persona_id, causa_muerte)
-        return {"message": "Persona marcada como muerta"}
+        persona_id = causa_muerte_request.persona_id
+        causa_muerte_obj = CausaMuerte(
+            causa=causa_muerte_request.causa_muerte.causa,
+            detalles=causa_muerte_request.causa_muerte.detalles,
+        )
+        if not causa_muerte_request.causa_muerte.detalles:
+            await schedule_death(db, persona_id, causa_muerte_obj)
+            return JSONResponse(
+                {"message": "Nueva causa de muerte programada."},
+                status_code=status.HTTP_200_OK,
+            )
+        await schedule_death(db, persona_id, causa_muerte_obj)
+        persona_dict = await get_person(db, persona_id)
+
+        if persona_dict:
+            asyncio.create_task(
+                notification_manager.broadcast_status_update(
+                    "person_updated", persona_dict
+                )
+            )
+        return {
+            "message": "Nueva causa de muerte programada. Si existía una programación anterior, ha sido cancelada."
+        }
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
