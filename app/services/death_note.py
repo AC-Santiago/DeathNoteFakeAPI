@@ -6,7 +6,7 @@ from app.schemas.persona import CausaMuerte, EstadoPersona
 from app.services.notification import notification_manager
 
 
-async def execute_death(
+async def _execute_death(
     db: AsyncClient, persona_id: str, causa_muerte: Optional[CausaMuerte] = None
 ):
     """
@@ -17,7 +17,7 @@ async def execute_death(
         if not persona:
             return
 
-        if check_if_person_is_dead(persona):
+        if _check_if_person_is_dead(persona):
             return
 
         if not causa_muerte:
@@ -25,6 +25,7 @@ async def execute_death(
                 causa="Ataque al corazón",
                 detalles="Muerte por defecto de la Death Note",
             )
+
         causa_muerte_dict_copy = causa_muerte.model_copy().model_dump().copy()
         date_format = causa_muerte_dict_copy["fecha_registro"].strftime(
             "%Y-%m-%d %H:%M:%S"
@@ -54,16 +55,26 @@ async def schedule_death(
     después de 40 segundos.
 
     Si se especifica causa_muerte, la persona morirá según los detalles
-    especificados después de 40 segundos + 6 minutos y 40 segundos adicionales
-    si se proporcionaron detalles.
+    especificados después de 40 segundos + 6 minutos y si se especifica
+    los detalles en 40 segundos
     """
-    cancel_scheduled_death(persona_id)
+    _cancel_scheduled_death(persona_id)
     perona = await get_person(db, persona_id)
+    final_request = False
+    if not _status_final_request or persona_id not in _status_final_request:
+        _status_final_request[persona_id] = False
+    if (
+        persona_id in _status_final_request
+        and _status_final_request[persona_id] is True
+    ):
+        raise ValueError(
+            f"La persona con ID {persona_id} ya se detallo su muerte y no puede ser cambiada."
+        )
     if not perona:
         raise ValueError(
             f"No se encontró la persona con ID {persona_id} para programar la muerte."
         )
-    if check_if_person_is_dead(perona):
+    if _check_if_person_is_dead(perona):
         raise ValueError(
             f"La persona con ID {persona_id} ya está muerta. No se puede programar la muerte."
         )
@@ -73,17 +84,20 @@ async def schedule_death(
         delay = 40
     if causa_muerte and causa_muerte.detalles:
         delay = 40
+        final_request = True
     task = asyncio.create_task(
-        execute_death_with_delay(db, persona_id, causa_muerte, delay)
+        _execute_death_with_delay(db, persona_id, causa_muerte, delay)
     )
 
     _scheduled_deaths[persona_id] = task
+    _status_final_request[persona_id] = final_request
 
 
 _scheduled_deaths = {}
+_status_final_request = {}
 
 
-async def execute_death_with_delay(
+async def _execute_death_with_delay(
     db: AsyncClient,
     persona_id: str,
     causa_muerte: Optional[CausaMuerte],
@@ -94,13 +108,13 @@ async def execute_death_with_delay(
     """
     try:
         await asyncio.sleep(delay)
-        await execute_death(db, persona_id, causa_muerte)
+        await _execute_death(db, persona_id, causa_muerte)
     finally:
         if persona_id in _scheduled_deaths:
             del _scheduled_deaths[persona_id]
 
 
-def cancel_scheduled_death(persona_id: str) -> bool:
+def _cancel_scheduled_death(persona_id: str) -> bool:
     """
     Cancela una muerte programada si existe.
     Retorna True si se canceló una muerte, False si no había ninguna programada.
@@ -113,7 +127,7 @@ def cancel_scheduled_death(persona_id: str) -> bool:
     return False
 
 
-def check_if_person_is_dead(persona: dict) -> bool:
+def _check_if_person_is_dead(persona: dict) -> bool:
     """
     Verifica si la persona está muerta.
     """
