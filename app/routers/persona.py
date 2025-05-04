@@ -9,6 +9,7 @@ from fastapi import (
     HTTPException,
     UploadFile,
     WebSocket,
+    WebSocketException,
     status,
 )
 from fastapi.responses import JSONResponse
@@ -55,12 +56,13 @@ async def websocket_deaths(websocket: WebSocket):
         await notification_manager.connect(websocket, "deaths")
         while True:
             try:
-                await websocket.send_json({"event": "ping"})
-                await asyncio.sleep(10)
+                await websocket.receive_text()
             except Exception:
                 break
-    except Exception:
-        pass
+    except Exception as e:
+        raise WebSocketException(
+            code=status.WS_1008_POLICY_VIOLATION, reason=str(e)
+        )
     finally:
         await notification_manager.disconnect(websocket, "deaths")
 
@@ -82,13 +84,13 @@ async def websocket_status(websocket: WebSocket):
 
         while True:
             try:
-                await websocket.send_json({"event": "ping"})
-                await asyncio.sleep(10)
+                await websocket.receive_text()
             except Exception:
                 break
     except Exception as e:
-        print(f"Error in WebSocket connection: {str(e)}")
-        pass
+        raise WebSocketException(
+            code=status.WS_1008_POLICY_VIOLATION, reason=str(e)
+        )
     finally:
         await notification_manager.disconnect(websocket, "status_updates")
 
