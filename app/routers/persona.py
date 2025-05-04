@@ -1,5 +1,5 @@
 import asyncio
-from typing import Annotated
+from typing import Annotated, Optional
 
 from fastapi import (
     APIRouter,
@@ -106,7 +106,7 @@ async def create_persona_endpoint(
     nombre: str = Body(..., description="Nombre de la persona"),
     apellido: str = Body(..., description="Apellido de la persona"),
     edad: int = Body(..., gt=0, lt=150, description="Edad de la persona"),
-    foto: UploadFile = File(...),
+    foto: Optional[UploadFile] = File(None, description="Foto de la persona"),
 ):
     """
     Registra una nueva persona en la Death Note.
@@ -116,7 +116,7 @@ async def create_persona_endpoint(
         persona_request = PersonaRequest(
             nombre=nombre, apellido=apellido, edad=edad
         )
-        foto_url = await upload_photo(foto)
+        foto_url = await upload_photo(foto) if foto else None
         new_persona = PersonaCreate(
             nombre=persona_request.nombre,
             apellido=persona_request.apellido,
@@ -152,6 +152,13 @@ async def death_persona_endpoint(
     """
     try:
         persona_id = causa_muerte_request.persona_id
+        persona_dict = await get_person(db, persona_id)
+
+        if not persona_dict["foto_url"]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="La persona no tiene foto; Por lo tanto, no se puede programar la muerte.",
+            )
         causa_muerte_obj = CausaMuerte(
             causa=causa_muerte_request.causa_muerte.causa,
             detalles=causa_muerte_request.causa_muerte.detalles,
@@ -163,7 +170,6 @@ async def death_persona_endpoint(
                 status_code=status.HTTP_200_OK,
             )
         await schedule_death(db, persona_id, causa_muerte_obj)
-        persona_dict = await get_person(db, persona_id)
 
         if persona_dict:
             asyncio.create_task(
