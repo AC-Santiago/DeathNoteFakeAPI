@@ -126,7 +126,8 @@ async def create_persona_endpoint(
             causa_muerte=None,
         )
         persona_dict = await create_person(db, new_persona, foto_url)
-        await schedule_death(db, persona_dict["uid"])
+        if foto_url:
+            await schedule_death(db, persona_dict["uid"])
 
         asyncio.create_task(
             notification_manager.broadcast_status_update(
