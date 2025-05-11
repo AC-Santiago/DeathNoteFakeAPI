@@ -1,10 +1,15 @@
 # Death Note API 📓
 
-Una API RESTful basada en FastAPI inspirada en Death Note, permitiendo gestionar y manipular información relacionada con el universo de Death Note.
+Una API RESTful basada en FastAPI inspirada en Death Note, permitiendo gestionar y manipular información relacionada con el universo de Death Note. En donde se podra registar a las personas y especificar su muerte, esto siguiendo las siguientes reglas:
+
+- Solo podran morir las personas registradas con una imagen.
+- Despues de registar a la persona tendra 40 seg para registar la causa de la muerte.
+- Si no se especifica la causa de la muerte, esta morira por un ataque al corazon.
+- Si la causa de la muerte es especificada, se tienen 6 minutos y 40 segundos adicionales para escribir los detalles específicos. En este caso, la persona morirá 40 seg después de especificar los detalles.
 
 ## 🚀 Características
 
-- CRUD completo para gestión de personas
+- CRUD completo para gestión de personas en la death note
 - Integración con Firebase para almacenamiento de datos
 - Soporte para subida de imágenes usando Cloudinary
 - Documentación automática con Swagger UI
@@ -97,8 +102,8 @@ La API estará disponible en `http://localhost:8000`
 
 ## ✒️ Autor
 
-* **Santiago Acosta Cespedes** - *Trabajo Inicial* - [Tu Usuario](https://github.com/AC-Santiago)
+* **Santiago Acosta Cespedes** - *Trabajo Inicial* - [AC-Santiago](https://github.com/AC-Santiago)
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia que especifiques - mira el archivo [LICENSE](LICENSE) para detalles
+Este proyecto está bajo la Licencia  GPL-3.0 license  - mira el archivo [LICENSE](LICENSE) para detalles
