@@ -102,7 +102,14 @@ La API estará disponible en `http://localhost:8000`
 
 ## ✒️ Autor
 
-* **Santiago Acosta Cespedes** - *Trabajo Inicial* - [AC-Santiago](https://github.com/AC-Santiago)
+* **Santiago Acosta Cespedes** - *Desarrollo de la Api* - [AC-Santiago](https://github.com/AC-Santiago)
+
+### Colaboradores
+
+* **Sebastian Alejandro Mojica Lozada** - *Colaborador* - [Sebastianmjk](https://github.com/Sebastianmjk)
+* **Julio Cesar Contreras Granda** - *Colaborador* - [Juliocontreras03](https://github.com/Juliocontreras03)
+* **Santiago Antonio Neira** - *Colaborador* - [Santiago-Neira](https://github.com/Santiago-Neira)
+
 
 ## 📄 Licencia
 
