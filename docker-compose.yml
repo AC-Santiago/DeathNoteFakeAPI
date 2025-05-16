@@ -16,9 +16,14 @@ services:
       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
-      - CLOUDINARY_URL=${CLOUDINARY_URL}
     develop:
       watch:
         - action: rebuild
           path: ./app
           target: /DeathNoteFake/app
+  web:
+    image: deathnote-app
+    build: ./DeathNote_UI/
+    ports:
+      - "8080:80"
+    restart: unless-stopped

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Death Note</title>
+    <link rel="stylesheet" href="DeathNote.css">
+</head>
+<body>
+    <!-- Contenedor izquierdo -->
+    <div class="left-container">
+        <div class="content">
+            <h2>Registro</h2>
+            <div class="form-container">
+                <button type="button" class="image-button" id="imageButton">
+                    <img id="previewImage" src="https://static.vecteezy.com/system/resources/previews/004/679/264/original/user-add-friend-icon-design-model-free-vector.jpg" alt="Agregar Imagen">
+                </button>
+                <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                <input type="text" id="name" placeholder="Nombre">
+                <input type="text" id="surname" placeholder="Apellido">
+                <button type="button" id="registerButton">Registrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor derecho -->
+    <div class="right-container">
+        <div class="content">
+            <h2>DEATH NOTE</h2>
+            <div class="notebook-container">
+                <div class="notebook-paper">
+                    <div class="notebook-line"></div>
+                    <div class="entries-container">
+                        <!-- Entradas dinámicas -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modales -->
+    <div class="modal" id="modal1">
+        <div class="modal-content">
+            <h3>¿De qué va a morir?</h3>
+            <input type="text" id="deathReason" placeholder="Escribe aquí...">
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                <button class="close-button" id="nextButton">Siguiente</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal2">
+        <div class="modal-content">
+            <h3>Especificaciones</h3>
+            <input type="text" id="specifications" placeholder="Escribe aquí...">
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                <button class="close-button" id="confirmButton">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="detailsModal">
+        <div class="modal-content">
+            <h3>Detalles de la Persona</h3>
+            <div class="details-image-container">
+                <img id="detailsImage" src="https://via.placeholder.com/150" alt="Imagen de la Persona">
+            </div>
+            <p><strong>Nombre:</strong> <span id="detailsName"></span></p>
+            <p><strong>Apellido:</strong> <span id="detailsSurname"></span></p>
+            <p><strong>De qué murió:</strong> <span id="detailsDeathReason"></span></p>
+            <p><strong>Especificaciones:</strong> <span id="detailsSpecifications"></span></p>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                <button class="close-button" id="closeDetailsButton">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="DeathNote.js"></script>
+</body>
+</html>
