@@ -17,6 +17,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const detailsSpecifications = document.getElementById('detailsSpecifications');
     const detailsImage = document.getElementById('detailsImage');
 
+    const API_BASE_URL = "http://localhost:8000"; // Cambia esto si el backend está en otro host o puerto
+
     // Elementos de la imagen
     const imageButton = document.getElementById('imageButton');
     const imageInput = document.getElementById('imageInput');
@@ -51,10 +53,47 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Abrir primer modal
-    registerButton.addEventListener('click', () => {
+    registerButton.addEventListener('click', async () => {
+        console.log("Register button clicked");
+        const name = nameInput.value.trim();
+    const surname = surnameInput.value.trim();
+    const age = parseInt(document.getElementById('age').value); // Asegúrate de tener un campo para la edad
+    const file = imageInput.files[0];
+
+    if (!file) {
+        alert("Por favor, selecciona una imagen.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("nombre", name);
+    formData.append("apellido", surname);
+    formData.append("edad", age);
+    formData.append("foto", file);
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/persona`, {
+            method: "POST",
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            alert(`Error: ${errorData.detail}`);
+            return;
+        }
+        const persona = await response.json();
+        alert("Persona registrada exitosamente.");
+        console.log("Persona creada:", persona);
+
+        // Opcional: Actualiza la UI con la nueva persona
         modal1.style.display = 'flex';
         deathReasonCompleted = false;
-    });
+    } catch (error) {
+        console.error("Error al registrar la persona:", error);
+        alert("Ocurrió un error al registrar la persona.");
+    }
+});
 
     // Siguiente modal
     nextButton.addEventListener('click', () => {
