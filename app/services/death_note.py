@@ -1,5 +1,6 @@
 import asyncio
 from typing import Optional
+from fastapi import HTTPException
 from google.cloud.firestore import AsyncClient
 from app.crud.persona import get_person, update_person
 from app.schemas.persona import CausaMuerte, EstadoPersona
@@ -15,10 +16,12 @@ async def _execute_death(
     try:
         persona = await get_person(db, persona_id)
         if not persona:
-            return
+            raise HTTPException(status_code=404, detail="Persona no encontrada")
 
         if _check_if_person_is_dead(persona):
-            return
+            raise HTTPException(
+                status_code=400, detail="La persona ya está muerta"
+            )
 
         if not causa_muerte:
             causa_muerte = CausaMuerte(
