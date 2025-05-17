@@ -1,43 +1,57 @@
 import pytest
-from fastapi.testclient import TestClient
+from unittest.mock import AsyncMock, MagicMock, patch
 from google.cloud.firestore import AsyncClient
-from unittest.mock import AsyncMock, patch
+from google.cloud.firestore_v1.document import DocumentSnapshot
+from google.cloud.firestore_v1.collection import CollectionReference
+from app.schemas.persona import PersonaCreate, EstadoPersona
+from uuid import UUID
 
-from app.main import app
-from app.schemas.persona import EstadoPersona
+
+class MockDocumentSnapshot:
+    def __init__(self, data=None, exists=True):
+        self._data = data or {}
+        self._exists = exists
+
+    def to_dict(self):
+        return self._data
+
+    @property
+    def exists(self):
+        return self._exists
 
 
 @pytest.fixture
-def test_client():
-    return TestClient(app)
+def mock_db():
+    """Fixture que proporciona un mock de AsyncClient de Firestore."""
+    mock_client = AsyncMock()
 
+    # Mock para collection
+    mock_collection = AsyncMock()
+    mock_client.collection = MagicMock(return_value=mock_collection)
 
-@pytest.fixture
-async def mock_db():
-    mock_client = AsyncMock(spec=AsyncClient)
+    # Mock para document
+    mock_doc_ref = AsyncMock()
+    mock_collection.document = MagicMock(return_value=mock_doc_ref)
 
-    async def mock_get_client():
-        yield mock_client
+    # Mock para get
+    mock_doc_ref.get.return_value = MockDocumentSnapshot(exists=True)
 
-    with patch("app.database.connection.get_client", mock_get_client):
-        yield mock_client
+    return mock_client
 
 
 @pytest.fixture
 def sample_persona_data():
+    """Fixture que proporciona datos de ejemplo para una persona."""
     return {
         "nombre": "Light",
         "apellido": "Yagami",
         "edad": 17,
         "estado": EstadoPersona.VIVO,
-        "foto_url": None,
-        "causa_muerte": None,
+        "foto_url": "http://example.com/foto.jpg",
     }
 
 
 @pytest.fixture
-def sample_death_request():
-    return {
-        "persona_id": "test-id",
-        "causa_muerte": {"causa": "Heart Attack", "detalles": "Death Note"},
-    }
+def persona_create_data(sample_persona_data):
+    """Fixture que proporciona un objeto PersonaCreate con datos de ejemplo."""
+    return PersonaCreate(**sample_persona_data)
