@@ -24,12 +24,7 @@ async def create_person(
     Raises:
         HTTPException: Si no se proporciona una foto
     """
-    if not foto_url:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Se requiere una foto para registrar a la persona",
-        )
-
+  
     try:
         persona = Persona(
             nombre=persona_data.nombre,

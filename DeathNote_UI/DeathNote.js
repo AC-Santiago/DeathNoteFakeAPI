@@ -21,6 +21,43 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const API_BASE_URL = "http://localhost:8000"; // Cambia esto si el backend está en otro host o puerto
 
+    const ws = new WebSocket("ws://localhost:8000/ws/status");
+
+ws.onopen = () => {
+    console.log("WebSocket conectado");
+};
+
+ws.onmessage = (event) => {
+    try {
+        const message = JSON.parse(event.data);
+        if (message.event === "death_notification" && message.data) {
+            const data = message.data;
+            const entries = document.querySelectorAll(".entry");
+            entries.forEach(entry => {
+                if (entry.dataset.personaId === data.persona_id) {
+                    const statusElement = entry.querySelector(".entry-status");
+                    if (statusElement) {
+                        statusElement.textContent = "Muerto";
+                        statusElement.className = "entry-status status-dead";
+                    }
+                    // Opcional: actualizar detalles en el dataset
+                    entry.dataset.deathReason = data.causa_muerte.causa;
+                    entry.dataset.specifications = data.causa_muerte.detalles;
+                }
+            });
+        }
+    } catch (e) {
+        console.error("Error procesando mensaje de WebSocket:", e);
+    }
+};
+
+ws.onerror = (error) => {
+    console.error("WebSocket error:", error);
+};
+
+ws.onclose = () => {
+    console.warn("WebSocket cerrado");
+};
     // Elementos de la imagen
     const imageButton = document.getElementById('imageButton');
     const imageInput = document.getElementById('imageInput');
@@ -66,27 +103,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Abrir primer modal con cooldown
     registerButton.addEventListener('click', async () => {
-        console.log("Register button clicked");
-        
-        registerButton.disabled = true;
-        
-        const name = nameInput.value.trim();
-        const surname = surnameInput.value.trim();
-        const age = ageInput.value.trim();
-        const file = imageInput.files[0];
+    console.log("Register button clicked");
+    registerButton.disabled = true;
 
-        if (!file) {
-        alert("Por favor, selecciona una imagen.");
-        return;
-        }
+    const name = nameInput.value.trim();
+    const surname = surnameInput.value.trim();
+    const age = ageInput.value.trim();
+    const file = imageInput.files[0];
 
-        const formData = new FormData();
-        formData.append("nombre", name);
-        formData.append("apellido", surname);
-        formData.append("edad", age);
+    const formData = new FormData();
+    formData.append("nombre", name);
+    formData.append("apellido", surname);
+    formData.append("edad", age);
+    if (file) {
         formData.append("foto", file);
+    }
 
-        try {
+    try {
         const response = await fetch(`${API_BASE_URL}/persona`, {
             method: "POST",
             body: formData,
@@ -101,15 +134,20 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("Persona creada:", persona);
 
         personaId = persona.uid;
-        
+
+        if (!file) {
+            return; // No abrir modal1
+        }
+
+        // Si hay foto, abrir modal1 normalmente
         modal1.style.display = 'flex';
         deathReasonCompleted = false;
 
-        } catch (error) {
+    } catch (error) {
         console.error("Error al registrar la persona:", error);
         alert("Ocurrió un error al registrar la persona.");
     }
-    });
+});
 
     let causa_primer_model=null;
 
