@@ -83,6 +83,16 @@ body {
     box-shadow: 0 0 8px rgba(200,0,0,0.3);
 }
 
+.form-container input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+.form-container input[type="number"]::-webkit-outer-spin-button,
+.form-container input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
 .form-container .image-button {
     width: 100%;
     height: 160px;
@@ -440,4 +450,15 @@ body {
         margin-left: 0;
         margin-bottom: 10px;
     }
+}
+.entry-age {
+    font-size: 14px;
+    color: #aaa;
+    margin-bottom: 6px;
+    padding: 2px 8px;
+    border: 1px solid #333;
+    border-radius: 4px;
+    background-color: #111;
+    display: inline-block;
+    width: fit-content;
 }

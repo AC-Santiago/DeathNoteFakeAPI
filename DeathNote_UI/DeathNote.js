@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Elementos del formulario
     const nameInput = document.getElementById('name');
     const surnameInput = document.getElementById('surname');
+    const ageInput = document.getElementById('age');
     const registerButton = document.getElementById('registerButton');
     const modal1 = document.getElementById('modal1');
     const modal2 = document.getElementById('modal2');
@@ -13,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeDetailsButton = document.getElementById('closeDetailsButton');
     const detailsName = document.getElementById('detailsName');
     const detailsSurname = document.getElementById('detailsSurname');
+    const detailsAge = document.getElementById('detailsAge');
     const detailsDeathReason = document.getElementById('detailsDeathReason');
     const detailsSpecifications = document.getElementById('detailsSpecifications');
     const detailsImage = document.getElementById('detailsImage');
@@ -30,12 +32,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Función para verificar campos
     function checkFields() {
-        registerButton.disabled = !(nameInput.value.trim() !== "" && surnameInput.value.trim() !== "");
+        const ageValue = ageInput.value.trim();
+        const isAgeValid = ageValue !== "" && !isNaN(ageValue) && ageValue >= 1 && ageValue <= 120;
+        
+        registerButton.disabled = !(
+            nameInput.value.trim() !== "" && 
+            surnameInput.value.trim() !== "" && 
+            isAgeValid
+        )
     }
 
     // Eventos para los campos de texto
     nameInput.addEventListener('input', checkFields);
     surnameInput.addEventListener('input', checkFields);
+    ageInput.addEventListener('input', checkFields);
 
     // Evento para el botón de imagen
     imageButton.addEventListener('click', () => imageInput.click());
@@ -53,33 +63,34 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     let personaId = null;
-    // Abrir primer modal
+
+    // Abrir primer modal con cooldown
     registerButton.addEventListener('click', async () => {
         console.log("Register button clicked");
-
+        
         registerButton.disabled = true;
+        
         const name = nameInput.value.trim();
         const surname = surnameInput.value.trim();
-     const age = parseInt(document.getElementById('age').value); // Asegúrate de tener un campo para la edad
-    const file = imageInput.files[0];
+        const age = ageInput.value.trim();
+        const file = imageInput.files[0];
 
-    if (!file) {
+        if (!file) {
         alert("Por favor, selecciona una imagen.");
         return;
-    }
+        }
 
-    const formData = new FormData();
-    formData.append("nombre", name);
-    formData.append("apellido", surname);
-    formData.append("edad", age);
-    formData.append("foto", file);
+        const formData = new FormData();
+        formData.append("nombre", name);
+        formData.append("apellido", surname);
+        formData.append("edad", age);
+        formData.append("foto", file);
 
-    try {
+        try {
         const response = await fetch(`${API_BASE_URL}/persona`, {
             method: "POST",
             body: formData,
         });
-
         if (!response.ok) {
             const errorData = await response.json();
             alert(`Error: ${errorData.detail}`);
@@ -89,16 +100,19 @@ document.addEventListener('DOMContentLoaded', function() {
         const persona = await response.json();
         console.log("Persona creada:", persona);
 
-        personaId = persona.uid; // Guarda el ID de la persona creada
-
-        // Opcional: Actualiza la UI con la nueva persona
+        personaId = persona.uid;
+        
         modal1.style.display = 'flex';
         deathReasonCompleted = false;
-    } catch (error) {
+
+        } catch (error) {
         console.error("Error al registrar la persona:", error);
+        alert("Ocurrió un error al registrar la persona.");
     }
-});
-let causa_primer_model=null;
+    });
+
+    let causa_primer_model=null;
+
     // Siguiente modal
     nextButton.addEventListener('click', async () => {
         const deathReason = document.getElementById('deathReason').value;
@@ -134,28 +148,27 @@ let causa_primer_model=null;
                 const causa1 = await response.json();
                 console.log("Causa añadida:", causa1);
                 causa_primer_model=causaMuerte.causa_muerte.causa;
-                
             deathReasonCompleted = true;
             modal1.style.display = 'none';
             modal2.style.display = 'flex';
             specificationsCompleted = false;
-        } catch (error) {
+             } catch (error) {
             console.error("Error al añadir causa", error);
         }
-        }
+    }
     });
 
     // Confirmar y añadir entrada
     confirmButton.addEventListener('click', async () => {
         const name = nameInput.value;
         const surname = surnameInput.value;
+        const age = ageInput.value;
         const specifications = document.getElementById('specifications').value;
         const deathReason = document.getElementById('deathReason').value;
 
         if (specifications.trim() === "") {
             alert("Por favor, escribe las especificaciones antes de confirmar.");
         } else {
-
             const causaMuerte2 = {
                 persona_id: personaId, // Reemplaza con el ID real de la persona si lo tienes
                 causa_muerte: {
@@ -185,7 +198,7 @@ let causa_primer_model=null;
                 }
                 const causa2 = await response.json();
                 console.log("Detalles añadidos:", causa2);
-                
+
             specificationsCompleted = true;
             const entriesContainer = document.querySelector(".entries-container");
             const newEntry = document.createElement("div");
@@ -198,6 +211,7 @@ let causa_primer_model=null;
             newEntry.innerHTML = `
                 <div class="entry-info">
                     <span class="entry-name">${name} ${surname}</span>
+                    <span class="entry-age">${age} años</span>
                     <span class="entry-status ${statusClass}">${status}</span>
                 </div>
                 <div class="entry-image-container">
@@ -208,6 +222,7 @@ let causa_primer_model=null;
             // Almacenar datos para el modal de detalles
             newEntry.dataset.name = name;
             newEntry.dataset.surname = surname;
+            newEntry.dataset.age = age;
             newEntry.dataset.deathReason = deathReason;
             newEntry.dataset.specifications = specifications;
             newEntry.dataset.image = previewImage.src;
@@ -217,6 +232,7 @@ let causa_primer_model=null;
             // Limpiar formulario
             nameInput.value = '';
             surnameInput.value = '';
+            ageInput.value = '';
             document.getElementById('specifications').value = '';
             document.getElementById('deathReason').value = '';
             previewImage.src = "https://static.vecteezy.com/system/resources/previews/004/679/264/original/user-add-friend-icon-design-model-free-vector.jpg";
@@ -228,11 +244,10 @@ let causa_primer_model=null;
 
             registerButton.disabled = true;
             modal2.style.display = 'none';
-
-        } catch (error) {
+            } catch (error) {
             console.error("Error al añadir causa", error);
         }
-        }
+    }
     });
 
     // Mostrar detalles al hacer clic en el estado
@@ -242,6 +257,7 @@ let causa_primer_model=null;
             const entry = statusElement.closest(".entry");
             detailsName.textContent = entry.dataset.name;
             detailsSurname.textContent = entry.dataset.surname;
+            detailsAge.textContent = entry.dataset.age ? `${entry.dataset.age} años` : "N/A";
             detailsDeathReason.textContent = entry.dataset.deathReason || "N/A";
             detailsSpecifications.textContent = entry.dataset.specifications || "N/A";
             detailsImage.src = entry.dataset.image || "https://via.placeholder.com/150";
