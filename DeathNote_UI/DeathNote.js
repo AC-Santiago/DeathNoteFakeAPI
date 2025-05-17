@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <img class="entry-image" src="${data.foto_url || "https://static.vecteezy.com/system/resources/previews/004/679/264/original/user-add-friend-icon-design-model-free-vector.jpg"}" alt="${data.nombre}">
                     </div>
                 `;
-                entriesContainer.appendChild(newEntry);
+                entriesContainer.prepend(newEntry);
             }
         }
             if (message.event === "death_notification" && message.data) {
@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <img class="entry-image" src="${data.foto_url || "https://static.vecteezy.com/system/resources/previews/004/679/264/original/user-add-friend-icon-design-model-free-vector.jpg"}" alt="${data.nombre}">
                         </div>
                     `;
-                    entriesContainer.appendChild(newEntry);
+                    entriesContainer.prepend(newEntry);
                 }
                 // Actualiza el modal de detalles si corresponde
                 if (
@@ -346,10 +346,10 @@ wsDeaths.onclose = () => {
                 modal2.style.display = 'flex';
                 specificationsCompleted = false;
 
-                if (closeModal1Timeout) clearTimeout(closeModal1Timeout);
-    closeModal1Timeout = setTimeout(() => {
-        if (modal1.style.display === 'flex') {
-            modal1.style.display = 'none';
+                if (closeModal1Timeout2) clearTimeout(closeModal1Timeout2);
+    closeModal1Timeout2 = setTimeout(() => {
+        if (modal2.style.display === 'flex') {
+            modal2.style.display = 'none';
         }
    }, 400000);
             } catch (error) {
@@ -369,9 +369,9 @@ wsDeaths.onclose = () => {
         if (specifications.trim() === "") {
             alert("Por favor, escribe las especificaciones antes de confirmar.");
         } else {
-            if (closeModal1Timeout) {
-            clearTimeout(closeModal1Timeout);
-            closeModal1Timeout = null;
+            if (closeModal1Timeout2) {
+            clearTimeout(closeModal1Timeout2);
+            closeModal1Timeout2 = null;
         }
             const causaMuerte2 = {
                 persona_id: personaId,
@@ -499,7 +499,7 @@ async function cargarPersonas() {
                         <img class="entry-image" src="${data.foto_url || "https://static.vecteezy.com/system/resources/previews/004/679/264/original/user-add-friend-icon-design-model-free-vector.jpg"}" alt="${data.nombre}">
                     </div>
                 `;
-                entriesContainer.appendChild(newEntry);
+                entriesContainer.prepend(newEntry);
             }
         });
     } catch (e) {
