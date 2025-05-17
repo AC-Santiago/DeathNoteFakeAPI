@@ -462,3 +462,9 @@ body {
     display: inline-block;
     width: fit-content;
 }
+.entries-container {
+    max-height: 400px;   /* Altura máxima visible, ajusta a tu gusto */
+    overflow-y: auto;    /* Scroll vertical si hay overflow */
+    width: 100%;
+    padding-right: 8px;  /* Espacio para el scroll */
+}
