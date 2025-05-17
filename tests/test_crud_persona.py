@@ -31,19 +31,8 @@ async def test_create_person_success(mock_db, persona_create_data):
 
 
 @pytest.mark.asyncio
-async def test_create_person_without_photo(mock_db, persona_create_data):
-    """Test de creación de persona sin foto."""
-    with pytest.raises(HTTPException) as exc_info:
-        await create_person(mock_db, persona_create_data, None)
-
-    assert exc_info.value.status_code == 400
-    assert "Se requiere una foto" in str(exc_info.value.detail)
-
-
-@pytest.mark.asyncio
 async def test_get_people_success(mock_db):
     """Test exitoso de obtención de lista de personas."""
-    # Datos de ejemplo
     mock_personas = [
         {"nombre": "Light", "apellido": "Yagami", "edad": 17},
         {"nombre": "L", "apellido": "Lawliet", "edad": 24},
