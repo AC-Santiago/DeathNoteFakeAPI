@@ -52,12 +52,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    let personaId = null;
     // Abrir primer modal
     registerButton.addEventListener('click', async () => {
         console.log("Register button clicked");
+
+        registerButton.disabled = true;
         const name = nameInput.value.trim();
-    const surname = surnameInput.value.trim();
-    const age = parseInt(document.getElementById('age').value); // Asegúrate de tener un campo para la edad
+        const surname = surnameInput.value.trim();
+     const age = parseInt(document.getElementById('age').value); // Asegúrate de tener un campo para la edad
     const file = imageInput.files[0];
 
     if (!file) {
@@ -80,36 +83,70 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!response.ok) {
             const errorData = await response.json();
             alert(`Error: ${errorData.detail}`);
+            registerButton.disabled = false;
             return;
         }
         const persona = await response.json();
-        alert("Persona registrada exitosamente.");
         console.log("Persona creada:", persona);
+
+        personaId = persona.uid; // Guarda el ID de la persona creada
 
         // Opcional: Actualiza la UI con la nueva persona
         modal1.style.display = 'flex';
         deathReasonCompleted = false;
     } catch (error) {
         console.error("Error al registrar la persona:", error);
-        alert("Ocurrió un error al registrar la persona.");
     }
 });
-
+let causa_primer_model=null;
     // Siguiente modal
-    nextButton.addEventListener('click', () => {
+    nextButton.addEventListener('click', async () => {
         const deathReason = document.getElementById('deathReason').value;
         if (deathReason.trim() === "") {
             alert("Por favor, escribe una razón antes de continuar.");
         } else {
+            const causaMuerte = {
+                persona_id: personaId, // Reemplaza con el ID real de la persona si lo tienes
+                causa_muerte: {
+                    causa: deathReason
+                }
+            };
+
+            const formData2 = new FormData();
+    formData2.append("persona_id", causaMuerte.persona_id);
+    formData2.append("causa", causaMuerte.causa_muerte.causa);
+
+    
+            try {
+                const response = await fetch(`${API_BASE_URL}/persona/death`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(causaMuerte),
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    alert(`Error: ${errorData.detail}`);
+                    registerButton.disabled = false;
+                    return;
+                }
+                const causa1 = await response.json();
+                console.log("Causa añadida:", causa1);
+                causa_primer_model=causaMuerte.causa_muerte.causa;
+                
             deathReasonCompleted = true;
             modal1.style.display = 'none';
             modal2.style.display = 'flex';
             specificationsCompleted = false;
+        } catch (error) {
+            console.error("Error al añadir causa", error);
+        }
         }
     });
 
     // Confirmar y añadir entrada
-    confirmButton.addEventListener('click', () => {
+    confirmButton.addEventListener('click', async () => {
         const name = nameInput.value;
         const surname = surnameInput.value;
         const specifications = document.getElementById('specifications').value;
@@ -118,6 +155,37 @@ document.addEventListener('DOMContentLoaded', function() {
         if (specifications.trim() === "") {
             alert("Por favor, escribe las especificaciones antes de confirmar.");
         } else {
+
+            const causaMuerte2 = {
+                persona_id: personaId, // Reemplaza con el ID real de la persona si lo tienes
+                causa_muerte: {
+                    causa: causa_primer_model,
+                    detalles: specifications
+                }
+            };
+
+            const formData3 = new FormData();
+            formData3.append("persona_id", causaMuerte2.persona_id);
+            formData3.append("causa", causaMuerte2.causa_muerte.causa);
+            formData3.append("detalles", causaMuerte2.causa_muerte.detalles);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/persona/death`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(causaMuerte2),
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    alert(`Error: ${errorData.detail}`);
+                    registerButton.disabled = false;
+                    return;
+                }
+                const causa2 = await response.json();
+                console.log("Detalles añadidos:", causa2);
+                
             specificationsCompleted = true;
             const entriesContainer = document.querySelector(".entries-container");
             const newEntry = document.createElement("div");
@@ -160,6 +228,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             registerButton.disabled = true;
             modal2.style.display = 'none';
+
+        } catch (error) {
+            console.error("Error al añadir causa", error);
+        }
         }
     });
 
