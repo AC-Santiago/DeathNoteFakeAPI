@@ -24,7 +24,6 @@ async def create_person(
     Raises:
         HTTPException: Si no se proporciona una foto
     """
-  
     try:
         persona = Persona(
             nombre=persona_data.nombre,
