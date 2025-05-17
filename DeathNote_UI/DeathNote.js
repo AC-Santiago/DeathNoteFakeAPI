@@ -249,7 +249,7 @@ wsDeaths.onclose = () => {
     });
 
     let personaId = null;
-
+    let closeModal1Timeout = null;
     registerButton.addEventListener('click', async () => {
         console.log("Register button clicked");
         registerButton.disabled = true;
@@ -291,6 +291,13 @@ wsDeaths.onclose = () => {
             modal1.style.display = 'flex';
             deathReasonCompleted = false;
 
+            if (closeModal1Timeout) clearTimeout(closeModal1Timeout);
+    closeModal1Timeout = setTimeout(() => {
+        if (modal1.style.display === 'flex') {
+            modal1.style.display = 'none';
+        }
+   }, 40000);
+
         } catch (error) {
             console.error("Error al registrar la persona:", error);
             alert("Ocurrió un error al registrar la persona.");
@@ -299,12 +306,17 @@ wsDeaths.onclose = () => {
 
     let causa_primer_model = null;
 
+    let closeModal1Timeout2 = null;
     // Siguiente modal
     nextButton.addEventListener('click', async () => {
         const deathReason = document.getElementById('deathReason').value;
         if (deathReason.trim() === "") {
             alert("Por favor, escribe una razón antes de continuar.");
         } else {
+            if (closeModal1Timeout) {
+            clearTimeout(closeModal1Timeout);
+            closeModal1Timeout = null;
+        }
             const causaMuerte = {
                 persona_id: personaId,
                 causa_muerte: {
@@ -333,6 +345,13 @@ wsDeaths.onclose = () => {
                 modal1.style.display = 'none';
                 modal2.style.display = 'flex';
                 specificationsCompleted = false;
+
+                if (closeModal1Timeout) clearTimeout(closeModal1Timeout);
+    closeModal1Timeout = setTimeout(() => {
+        if (modal1.style.display === 'flex') {
+            modal1.style.display = 'none';
+        }
+   }, 400000);
             } catch (error) {
                 console.error("Error al añadir causa", error);
             }
@@ -350,6 +369,10 @@ wsDeaths.onclose = () => {
         if (specifications.trim() === "") {
             alert("Por favor, escribe las especificaciones antes de confirmar.");
         } else {
+            if (closeModal1Timeout) {
+            clearTimeout(closeModal1Timeout);
+            closeModal1Timeout = null;
+        }
             const causaMuerte2 = {
                 persona_id: personaId,
                 causa_muerte: {
