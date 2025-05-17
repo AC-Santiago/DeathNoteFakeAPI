@@ -41,7 +41,6 @@ DATABASE_URL=""
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
-CLOUDINARY_URL=
 ```
 
 ## 🛠️ Instalación
@@ -54,7 +53,6 @@ cd DeathNoteFakeAPI
 
 2. Crear y activar entorno virtual
 
-
 - Con uv:
 ```bash
 uv sync
@@ -62,6 +60,14 @@ source .venv/bin/activate # Linux/Mac
 .\.venv\Scripts\activate # Windows
 ```
 
+3. Copiar el .json de firebase, en la ruta de: `app/json/llave_privada_firebase.json`
+
+```
+.
+└── app
+     └── json
+         └── deathnotefakedb-firebase.json
+```
 
 ## 🐳 Uso con Docker
 
